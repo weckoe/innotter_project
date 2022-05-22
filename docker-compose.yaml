@@ -1,0 +1,35 @@
+version: "3.8"
+   
+services: 
+  web:
+    build:
+      context: .
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_NAME=innotter_db
+      - POSTGRES_USER=kirill
+      - POSTGRES_PASSWORD=password
+      - ALLOWED_HOSTS=*
+      - SECRET_KEY=vvno_hiu+6-qbv8+4_kxly8@6@a9#(_681ewc&)fe*75u-j6+j
+    depends_on:
+        - db 
+  db:
+    image: postgres:14.1
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=innotter_db
+      - POSTGRES_USER=kirill
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+
+networks:
+    djangonetwork:
+      driver: bridge
