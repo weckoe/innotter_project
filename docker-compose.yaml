@@ -11,12 +11,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_NAME=innotter_db
-      - POSTGRES_USER=kirill
-      - POSTGRES_PASSWORD=password
-      - ALLOWED_HOSTS=*
-      - SECRET_KEY=vvno_hiu+6-qbv8+4_kxly8@6@a9#(_681ewc&)fe*75u-j6+j
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
         - db 
   db:
@@ -24,9 +24,9 @@ services:
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=innotter_db
-      - POSTGRES_USER=kirill
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
 

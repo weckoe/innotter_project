@@ -1,0 +1,3 @@
+JWT_SECRET = 'secret'  
+JWT_ACCESS_TTL = 60 * 10  
+JWT_REFRESH_TTL = 3600 * 24 * 7 

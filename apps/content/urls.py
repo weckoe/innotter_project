@@ -3,12 +3,14 @@ from rest_framework.routers import DefaultRouter
 from apps.content.views import (
     PostViewSet,
     TagViewSet,
+    PageViewSet,
 )
 
 router = DefaultRouter()
 
 router.register(r"posts", PostViewSet, basename="posts")
 router.register(r"tags", TagViewSet, basename="tags")
+router.register(r"pages", PageViewSet, basename="pages")
 
 urlpatterns = [
     path("", include(router.urls))
