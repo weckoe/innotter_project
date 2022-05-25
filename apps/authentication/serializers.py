@@ -15,7 +15,7 @@ from apps.authentication.jwt_constants import (
         )
 
 
-class UserListRetrieveSerializer(serializers.ModelSerializer):
+class UserGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (

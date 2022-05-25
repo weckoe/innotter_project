@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import ( 
@@ -10,7 +10,7 @@ from rest_framework.permissions import (
 
 from apps.authentication.models import User
 from apps.authentication.serializers import (
-    UserListRetrieveSerializer,
+    UserGetSerializer,
     UserUpdateSerializer,
     UserCreateSerializer,
     LoginSerializer,
@@ -28,21 +28,15 @@ class IsAuthenticated(BasePermission):
         False
 
 
-class UserViewSet(viewsets.ViewSet, LimitOffsetPagination):
+class UserViewSet(viewsets.ModelViewSet, LimitOffsetPagination):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, ) 
     authentication_classes = (JWTAuthentication,)
 
-
-    def list(self, request):
-        results = self.paginate_queryset(self.queryset, request)
-        serializer = UserListRetrieveSerializer(results, many=True)
-        return self.get_paginated_response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        user = get_object_or_404(User, pk=pk)
-        serializer = UserListRetrieveSerializer(user)
-        return Response(serializer.data)
+    def get_serializer_class(self):
+        if self.action == "list" or "retrieve":
+            return UserGetSerializer
+        return UserGetSerializer
 
     def create(self, request):
         serializer = UserCreateSerializer(data=request.data)
@@ -64,21 +58,22 @@ class UserViewSet(viewsets.ViewSet, LimitOffsetPagination):
         return Response(status=HTTPStatus.ACCEPTED)
 
 
-class LoginViewSet(viewsets.ViewSet):
+class LoginView(mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
-    permission_classes = (AllowAny,) 
+    permission_classes = (AllowAny,)
 
-    def create(self, request):
+    def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         response_data = serializer.save()
+
         return Response(response_data)
 
-class RefreshTokenViewSet(viewsets.ViewSet):
+class RefreshTokenView(mixins.ListModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,) 
 
-    def create(self, request):
+    def post(self, request):
         serializer = RefreshTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         response_data = serializer.save()

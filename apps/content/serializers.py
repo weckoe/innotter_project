@@ -7,7 +7,7 @@ from apps.content.models import (
 )
 
 
-class PostListRetrieveSerializer(serializers.ModelSerializer):
+class PostGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = (
@@ -15,7 +15,7 @@ class PostListRetrieveSerializer(serializers.ModelSerializer):
             "page",
 
         )
-
+     
 class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
@@ -31,14 +31,14 @@ class PostUpdateSerializer(serializers.ModelSerializer):
             "content",
         )
 
-        def update(self, validated_data, instance):
-            instance.content = validated_data["content"]
+    def update(self, validated_data, instance):
+        instance.content = validated_data["content"]
 
-            instance.save()
+        instance.save()
 
-            return instance
+        return instance
 
-class TagListRetrieveSerializer(serializers.ModelSerializer):
+class TagGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = (
@@ -70,7 +70,7 @@ class TagCreateSerializer(serializers.ModelSerializer):
         
         return new_tag
 
-class PageListSerializer(serializers.ModelSerializer):
+class PageGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = (

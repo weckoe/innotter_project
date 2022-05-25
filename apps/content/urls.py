@@ -13,5 +13,5 @@ router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"pages", PageViewSet, basename="pages")
 
 urlpatterns = [
-    path("", include(router.urls))
-]
+    path("api/", include(router.urls)),
+    ]

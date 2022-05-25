@@ -1,7 +1,8 @@
 from django.contrib import admin
 from apps.content.models import (
     Page,
-    Post
+    Post,
+    Tag,
 )
 
 
@@ -11,5 +12,9 @@ class PageAdmin(admin.ModelAdmin):
 
 
 @admin.register(Post)
-class PageAdmin(admin.ModelAdmin):
+class PostAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
     pass

@@ -4,16 +4,16 @@ from rest_framework.routers import DefaultRouter
 
 from apps.authentication.views import (
     UserViewSet, 
-    LoginViewSet,
-    RefreshTokenViewSet,
+    LoginView,
+    RefreshTokenView,
 )
 
 router = DefaultRouter()
 
 router.register(r"users", UserViewSet, basename="users")
-router.register(r"login", LoginViewSet, basename="login")
-router.register(r"refresh", RefreshTokenViewSet, basename="refresh")
 
 urlpatterns = [
-    path("", include(router.urls))
+    path("", include(router.urls)),
+    path("login/", LoginView.as_view(), name="login"),
+    path("refresh/", RefreshTokenView.as_view(), name="refresh")
 ]
