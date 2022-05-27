@@ -73,8 +73,6 @@ class UserViewSet(viewsets.ModelViewSet, LimitOffsetPagination):
         return Response(status=HTTPStatus.ACCEPTED)
 
 
-
-
 class LoginView(mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)

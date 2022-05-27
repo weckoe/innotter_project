@@ -47,7 +47,7 @@ class PostViewSet(
     mixins.UpdateModelMixin,
     LimitOffsetPagination
 ):
-    permission_classes = [IsAdminUser|IsAuthenticated]
+    permission_classes = [IsAdminUser | IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
     queryset = Post.objects.all()
     serializer_classes = {
@@ -58,7 +58,14 @@ class PostViewSet(
     }
 
     def get_serializer_class(self):
-        return self.serializer_classes.get(self.action, PostViewSet)
+        return self.serializer_classes.get(self.action, PostGetSerializer)
+
+    @action(methods=['GET', ], url_path="followed-pages-posts", url_name="followed-pages-posts", detail=False)
+    def list_followed_pages_posts(self, request):
+        posts = Post.objects.filter(page_id__in=[page.id for page in Page.objects.all().filter(followers=request.user.id)])
+        serializer = self.get_serializer(posts, many=True)
+
+        return Response(data=serializer.data)
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -90,7 +97,7 @@ class TagViewSet(viewsets.GenericViewSet,
                  mixins.UpdateModelMixin,
                  LimitOffsetPagination
                  ):
-    permission_classes = [IsAdminUser|IsAuthenticated]
+    permission_classes = [IsAdminUser | IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
     queryset = Tag.objects.all()
     serializer_classes = {
@@ -134,7 +141,7 @@ class PageViewSet(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
 ):
-    permission_classes = [IsAdminUser|IsAuthenticated]
+    permission_classes = [IsAdminUser | IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
     queryset = Page.objects.all()
     serializer_classes = {
@@ -146,6 +153,17 @@ class PageViewSet(
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action, PageGetSerializer)
+
+    @action(methods=['POST', ], url_path="make-page-private/(?P<uuid>[\w-]+)", url_name="make-page-private",
+            detail=False)
+    def make_page_private(self, request, uuid=None):
+        page = Page.objects.get(id=uuid)
+        if request.user.id == page.owner_id:
+            page.is_private = True
+            page.save()
+
+            return Response(status=HTTPStatus.ACCEPTED)
+        return Response(status=HTTPStatus.NOT_ACCEPTABLE)
 
     @action(methods=['POST', ], url_path="follow/(?P<uuid>[\w-]+)", url_name="follow", detail=False)
     def follow(self, request, uuid=None):
@@ -167,7 +185,7 @@ class PageViewSet(
             page.save()
 
             return Response(status=HTTPStatus.ACCEPTED)
-        raise ValidationError("this is not your page")
+        return Response(status=HTTPStatus.NOT_ACCEPTABLE)
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -185,7 +203,7 @@ class PageViewSet(
             serializer.save()
 
             return Response(serializer.validated_data["name"])
-        raise ValidationError("this is not you page")
+        return Response(status=HTTPStatus.NOT_ACCEPTABLE)
 
     def delete(self, request, pk=None):
         page = get_object_or_404(Page, pk=pk)
@@ -193,4 +211,4 @@ class PageViewSet(
             page.delete()
 
             return Response(status=HTTPStatus.ACCEPTED)
-        raise ValidationError("this not your page")
+        return Response(status=HTTPStatus.NOT_ACCEPTABLE)

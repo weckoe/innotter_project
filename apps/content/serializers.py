@@ -13,7 +13,6 @@ class PostGetSerializer(serializers.ModelSerializer):
         fields = (
             "content",
             "page",
-
         )
 
 
@@ -140,4 +139,3 @@ class PageUpdateSerializer(serializers.ModelSerializer):
             instance.save()
 
             return instance
-
