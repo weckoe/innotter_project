@@ -1,0 +1,10 @@
+/venv/
+/data/
+/db.sqlite3
+__pycache__/
+.idea/
+.vim/
+/.env
+/tmPipfile
+/Pipfile.lock
+/venv/
