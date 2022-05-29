@@ -1,11 +1,9 @@
 import jwt
 
-from django.conf import settings
-
 from rest_framework import authentication, exceptions
 
 from apps.authentication.models import User
-from apps.authentication.jwt_constants import JWT_SECRET
+from innotter.settings import JWT_SECRET
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
@@ -47,4 +45,3 @@ class JWTAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed(msg)
 
         return (user, token)
-

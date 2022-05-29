@@ -7,15 +7,27 @@ from django.contrib.auth import get_user_model
 
 from datetime import datetime, timedelta
 
-from apps.authentication.models import User
-from apps.authentication.jwt_constants import (
-        JWT_SECRET, 
-        JWT_ACCESS_TTL,
-        JWT_REFRESH_TTL,
+from innotter.settings import (
+    JWT_SECRET,
+    JWT_ACCESS_TTL,
+    JWT_REFRESH_TTL,
+)
+
+User = get_user_model()
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "role",
+            "is_blocked",
         )
 
 
-class UserGetSerializer(serializers.ModelSerializer):
+class UserRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -112,12 +124,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
         return new_user
 
-UserModel = get_user_model()
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, write_only=True)
     password = serializers.CharField(required=True, write_only=True)
-    
+
     access = serializers.CharField(read_only=True)
     refresh = serializers.CharField(read_only=True)
 
@@ -125,16 +136,16 @@ class LoginSerializer(serializers.Serializer):
         error_msg = ("email or password are incorrect")
 
         try:
-            user = UserModel.objects.get(email=validated_data["email"])
+            user = User.objects.get(email=validated_data["email"])
 
             if not user.check_password(validated_data["password"]):
                 raise serializers.ValidationError(error_msg)
 
             validated_data["user"] = user
-        
-        except UserModel.DoesNotExist:
-            raise serializers.ValidationError(error_msg)        
-        
+
+        except User.DoesNotExist:
+            raise serializers.ValidationError(error_msg)
+
         return validated_data
 
     def create(self, validated_data):
@@ -162,6 +173,7 @@ class LoginSerializer(serializers.Serializer):
             "refresh": refresh
         }
 
+
 class RefreshTokenSerializer(serializers.Serializer):
     refresh_token = serializers.CharField(required=True, write_only=True)
     access = serializers.CharField(read_only=True)
@@ -184,7 +196,7 @@ class RefreshTokenSerializer(serializers.Serializer):
         except jwt.InvalidTokenError:
             error_msg = {"refresh_token": "Refresh token is invalid!"}
             raise serializers.ValidationError(error_msg)
-    
+
         return validated_data
 
     def create(self, validated_data):

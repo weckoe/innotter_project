@@ -1,8 +1,0 @@
-from http import HTTPStatus
-
-def follow_user(self, page_instance, user_id):
-    page_instance.followers.add(user_id)
-    page_instance.save()
-    
-    return Response(status=HTTPStatus.ACCEPTED)
-
