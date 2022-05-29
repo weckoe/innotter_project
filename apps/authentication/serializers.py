@@ -7,15 +7,27 @@ from django.contrib.auth import get_user_model
 
 from datetime import datetime, timedelta
 
-from apps.authentication.models import User
-from apps.authentication.jwt_constants import (
+from innotter.settings import (
     JWT_SECRET,
     JWT_ACCESS_TTL,
     JWT_REFRESH_TTL,
 )
 
+User = get_user_model()
 
-class UserGetSerializer(serializers.ModelSerializer):
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "role",
+            "is_blocked",
+        )
+
+
+class UserRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -113,9 +125,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return new_user
 
 
-UserModel = get_user_model()
-
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, write_only=True)
     password = serializers.CharField(required=True, write_only=True)
@@ -127,14 +136,14 @@ class LoginSerializer(serializers.Serializer):
         error_msg = ("email or password are incorrect")
 
         try:
-            user = UserModel.objects.get(email=validated_data["email"])
+            user = User.objects.get(email=validated_data["email"])
 
             if not user.check_password(validated_data["password"]):
                 raise serializers.ValidationError(error_msg)
 
             validated_data["user"] = user
 
-        except UserModel.DoesNotExist:
+        except User.DoesNotExist:
             raise serializers.ValidationError(error_msg)
 
         return validated_data

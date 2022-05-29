@@ -7,10 +7,20 @@ from apps.content.models import (
 )
 
 
-class PostGetSerializer(serializers.ModelSerializer):
+class PostListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = (
+            "id",
+            "page",
+        )
+
+
+class PostRetrieveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = (
+            "id",
             "content",
             "page",
         )
@@ -40,7 +50,7 @@ class PostUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TagGetSerializer(serializers.ModelSerializer):
+class TagListAndRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = (
@@ -75,7 +85,17 @@ class TagCreateSerializer(serializers.ModelSerializer):
         return new_tag
 
 
-class PageGetSerializer(serializers.ModelSerializer):
+class PageListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Page
+        fields = (
+            "id",
+            "name",
+            "owner",
+        )
+
+
+class PageRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = (

@@ -1,9 +1,8 @@
-from http import HTTPStatus
+from django.contrib.auth import get_user_model
 
 from rest_framework.decorators import action
-from rest_framework import viewsets, mixins, generics
+from rest_framework import mixins, generics, status, viewsets
 from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
     AllowAny,
     BasePermission,
@@ -11,7 +10,8 @@ from rest_framework.permissions import (
 
 from apps.authentication.models import User
 from apps.authentication.serializers import (
-    UserGetSerializer,
+    UserListSerializer,
+    UserRetrieveSerializer,
     UserUpdateSerializer,
     UserCreateSerializer,
     LoginSerializer,
@@ -21,34 +21,35 @@ from apps.authentication.backends import JWTAuthentication
 
 from django.shortcuts import get_object_or_404
 
+User = get_user_model()
+
 
 class IsAuthenticated(BasePermission):
     def has_permission(self, request, view):
         if request.user.role == "admin" or request.user.role == "moderator":
             return True
-        False
+        return False
 
 
-class UserViewSet(viewsets.ModelViewSet, LimitOffsetPagination):
+class UserViewSet(
+    viewsets.GenericViewSet,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+):
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     authentication_classes = (JWTAuthentication,)
     serializer_classes = {
-        "list": UserGetSerializer,
-        "retrieve": UserGetSerializer,
+        "list": UserListSerializer,
+        "retrieve": UserRetrieveSerializer,
         "update": UserUpdateSerializer,
         "create": UserCreateSerializer,
     }
 
     def get_serializer_class(self):
-        return self.serializer_classes.get(self.action, UserGetSerializer)
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.validated_data)
+        return self.serializer_classes.get(self.action, UserListSerializer)
 
     def update(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
@@ -56,13 +57,13 @@ class UserViewSet(viewsets.ModelViewSet, LimitOffsetPagination):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(serializer.validated_data)
+        return Response(serializer.validated_data, status=status.HTTP_202_ACCEPTED)
 
     def delete(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
         user.delete()
 
-        return Response(status=HTTPStatus.ACCEPTED)
+        return Response(status=status.HTTP_202_ACCEPTED)
 
     @action(methods=['POST', ], url_path="block-user/(?P<id>[0-9]+)", url_name="block-user", detail=False)
     def block_user(self, request, id=None):
@@ -70,7 +71,7 @@ class UserViewSet(viewsets.ModelViewSet, LimitOffsetPagination):
         user.is_blocked = True
         user.save()
 
-        return Response(status=HTTPStatus.ACCEPTED)
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class LoginView(mixins.CreateModelMixin, generics.GenericAPIView):
@@ -82,7 +83,7 @@ class LoginView(mixins.CreateModelMixin, generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         response_data = serializer.save()
 
-        return Response(response_data)
+        return Response(response_data, status=status.HTTP_202_ACCEPTED)
 
 
 class RefreshTokenView(mixins.ListModelMixin, generics.GenericAPIView):
@@ -93,4 +94,4 @@ class RefreshTokenView(mixins.ListModelMixin, generics.GenericAPIView):
         serializer = RefreshTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         response_data = serializer.save()
-        return Response(response_data)
+        return Response(response_data, status=status.HTTP_202_ACCEPTED)
