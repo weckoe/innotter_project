@@ -7,22 +7,33 @@ from apps.content.models import (
 )
 
 
-class PostGetSerializer(serializers.ModelSerializer):
+class PostListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = (
+            "id",
+            "page",
+        )
+
+
+class PostRetrieveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = (
+            "id",
+            "content",
+            "page",
+        )
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = (
             "content",
             "page",
+        )
 
-        )
-     
-class PostCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = (
-                "content",
-                "page",
-        )
 
 class PostUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,12 +49,14 @@ class PostUpdateSerializer(serializers.ModelSerializer):
 
         return instance
 
-class TagGetSerializer(serializers.ModelSerializer):
+
+class TagListAndRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = (
             "name",
         )
+
 
 class TagUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,6 +71,7 @@ class TagUpdateSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 class TagCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -67,10 +81,21 @@ class TagCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         new_tag = Tag.objects.create(name=validated_data["name"])
-        
+
         return new_tag
 
-class PageGetSerializer(serializers.ModelSerializer):
+
+class PageListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Page
+        fields = (
+            "id",
+            "name",
+            "owner",
+        )
+
+
+class PageRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = (
@@ -82,17 +107,18 @@ class PageGetSerializer(serializers.ModelSerializer):
             "tags",
             "followers",
             "follow_requests",
-        ) 
+        )
+
 
 class PageCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = (
-                "name",
-                "owner",
-                "description",
-                "tags",
-            )
+            "name",
+            "owner",
+            "description",
+            "tags",
+        )
         extra_kwargs = {
             "name": {"required": True},
             "owner": {"required": True},
@@ -100,9 +126,9 @@ class PageCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         new_page = Page.objects.create(
-                name=validated_data["name"],
-                owner=validated_data["owner"],
-                description=validated_data["description"],
+            name=validated_data["name"],
+            owner=validated_data["owner"],
+            description=validated_data["description"],
         )
         for single_tag in validated_data["tags"]:
             new_page.tags.add(single_tag)
@@ -111,15 +137,16 @@ class PageCreateSerializer(serializers.ModelSerializer):
 
         return new_page
 
+
 class PageUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = (
-                "name",
-                "owner",
-                "description",
-                "tags",
-            )
+            "name",
+            "owner",
+            "description",
+            "tags",
+        )
 
         def update(self, validated_data, instance):
             instance.name = validated_data["name"]

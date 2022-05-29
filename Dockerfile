@@ -9,9 +9,13 @@ RUN apk update && apk upgrade && apk add postgresql-dev gcc python3-dev musl-dev
 #requirements for pilllow
 RUN apk add zlib-dev jpeg-dev gcc musl-dev
 
+#bash for entrypoint.sh
+RUN apk update && apk add bash
+
 RUN pip install --upgrade pip
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . /app/
 WORKDIR /app/
+ENTRYPOINT ["./entrypoint.sh"]
 
