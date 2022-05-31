@@ -1,10 +1,11 @@
 import pytest
+import jwt
 
 from django.urls import reverse
+from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from apps.authentication.fixtures import auto_login_user
-
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -82,7 +83,7 @@ def test_user_create_view(client, auto_login_user):
 
 
 @pytest.mark.django_db
-def test_user_block_user_view(client, auto_login_user):
+def test_block_user_view(client, auto_login_user):
     access_token, refresh_token, user = auto_login_user()
 
     url = reverse("authentication:users-block-user", kwargs={"id": str(user.id)})
@@ -93,3 +94,37 @@ def test_user_block_user_view(client, auto_login_user):
 
     assert response.status_code == 202
     assert User.objects.get(id=user.id).is_blocked == True
+
+
+@pytest.mark.django_db
+def test_login_user_view(client):
+    user = User.objects.create_user(
+        username="loginuser",
+        email="login_user@gmail.com",
+        password="123",
+        role="user"
+    )
+    url = reverse("authentication:login")
+    response = client.post(
+        url,
+        data={
+            "email": user.email,
+            "password": "123",
+        }
+    )
+    payload = jwt.decode(response.data["access"], key=settings.JWT_SECRET, algorithms=['HS256', ])
+    assert payload["user_id"] == user.id
+
+
+@pytest.mark.django_db
+def test_refresh_user_view(client, auto_login_user):
+    access_token, refresh_token, user = auto_login_user()
+    url = reverse("authentication:refresh")
+    response = client.post(
+        url,
+        data={
+            "refresh_token": refresh_token
+        }
+    )
+    payload = jwt.decode(response.data["access"], key=settings.JWT_SECRET, algorithms=['HS256', ])
+    assert payload["user_id"] == user.id
