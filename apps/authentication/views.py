@@ -8,7 +8,6 @@ from rest_framework.permissions import (
     BasePermission,
 )
 
-from apps.authentication.models import User
 from apps.authentication.serializers import (
     UserListSerializer,
     UserRetrieveSerializer,
@@ -39,7 +38,7 @@ class UserViewSet(
     mixins.UpdateModelMixin,
 ):
     queryset = User.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     authentication_classes = (JWTAuthentication,)
     serializer_classes = {
         "list": UserListSerializer,
