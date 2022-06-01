@@ -20,4 +20,4 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("apps.authentication.urls")),
     path("", include("apps.content.urls")),
-    ]
+]

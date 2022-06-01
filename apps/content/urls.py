@@ -6,6 +6,8 @@ from apps.content.views import (
     PageViewSet,
 )
 
+app_name = "content"
+
 router = DefaultRouter()
 
 router.register(r"posts", PostViewSet, basename="posts")

@@ -150,7 +150,7 @@ class PageViewSet(
             return Response(status=status.HTTP_202_ACCEPTED)
         return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    @action(methods=['POST', ], url_path="follow/(?P<uuid>[\w-]+)", url_name="follow", detail=False)
+    @action(methods=['GET', ], url_path="follow/(?P<uuid>[\w-]+)", url_name="follow", detail=False)
     def follow(self, request, uuid=None):
         page = Page.objects.get(id=uuid)
         page.follow_requests.add(request.user.id)
